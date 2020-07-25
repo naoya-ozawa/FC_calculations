@@ -11,7 +11,7 @@ using namespace std;
 int main(int argc, char** argv){
 	TRint rootapp("app",&argc,argv);
 	TCanvas *c1 = new TCanvas();
-	c1->Divide(2,2);
+	c1->Divide(3,2);
 
 	// Part 1: formulation
 	c1->cd(1);
@@ -22,6 +22,7 @@ int main(int argc, char** argv){
 	l_form->DrawLatex(0.2,0.5,"E_{loss}: energy loss in the SUS303 [eV]");
 	l_form->DrawLatex(0.2,0.4,"d: depth [#AA]");
 	l_form->DrawLatex(0.2,0.3,"E_{#alpha}: #alpha ray energy [MeV]");
+	TLatex *l_eloss = new TLatex();
 
 	// Part 2: depth dependence
 	c1->cd(2);
@@ -92,6 +93,10 @@ int main(int argc, char** argv){
 	double dedde = TMath::Sqrt(dedd5e*dedd5e + dedd6e*dedd6e + dedd7e*dedd7e) / 3.0;
 	double d0 = (d05 + d06 + d07) / 3.0;
 	double d0e = TMath::Sqrt(d05e*d05e + d06e*d06e + d07e*d07e) / 3.0;
+//	l_eloss->DrawLatex(0.1,0.9,Form("d_{0}|_{E_{#alpha} = 5 MeV} = %3.3f #pm %3.3f #AA",d05,d05e));
+//	l_eloss->DrawLatex(0.1,0.8,Form("d_{0}|_{E_{#alpha} = 6 MeV} = %3.3f #pm %3.3f #AA",d06,d06e));
+//	l_eloss->DrawLatex(0.1,0.7,Form("d_{0}|_{E_{#alpha} = 7 MeV} = %3.3f #pm %3.3f #AA",d07,d07e));
+	l_eloss->DrawLatex(12.,150.,Form("d_{0} = %3.3f #AA",d0));
 
 	// Part 3: energy dependence
 	c1->cd(3);
@@ -109,20 +114,103 @@ int main(int argc, char** argv){
 	double deddcoefe = felossedep->GetParError(0);
 	double deddconst = felossedep->GetParameter(1);
 	double deddconste = felossedep->GetParError(1);
+	l_eloss->DrawLatex(6.0,55.,Form("C_{0} = %3.3f eV MeV/#AA",deddcoef));
+	l_eloss->DrawLatex(6.0,50.,Form("C_{1} = %3.3f eV/#AA",deddconst));
+//	l_eloss->DrawLatex(0.1,0.3,"Ignoring fit parameter errors,");
+//	l_eloss->DrawLatex(0.1,0.2,Form("E_{loss} = #left[ #frac{%3.1f}{E_{#alpha}} + %3.1f #right] (d + %3.1f)",deddcoef,deddconst,d0));
+//	l_eloss->DrawLatex(0.4,0.1,Form("#pm #sqrt{ #left[ #frac{%3.1f}{E_{#alpha}^{2}} + %3.1f #right](#Deltad)^{2} + #frac{%3.1f}{E_{#alpha}^{4}}(d^{2} + %3.1f)(#DeltaE_{#alpha})^{2} }",deddcoef*deddcoef,deddconst*deddconst,deddcoef*deddcoef,d0*d0));
 
-	
-	// Part 4: result
+
+	// Part 4: StDev formulation
 	c1->cd(4);
-	TLatex *l_eloss = new TLatex();
-	l_eloss->DrawLatex(0.1,0.9,Form("d_{0}|_{E_{#alpha} = 5 MeV} = %3.3f #pm %3.3f #AA",d05,d05e));
-	l_eloss->DrawLatex(0.1,0.8,Form("d_{0}|_{E_{#alpha} = 6 MeV} = %3.3f #pm %3.3f #AA",d06,d06e));
-	l_eloss->DrawLatex(0.1,0.7,Form("d_{0}|_{E_{#alpha} = 7 MeV} = %3.3f #pm %3.3f #AA",d07,d07e));
-	l_eloss->DrawLatex(0.2,0.6,Form("#rightarrow (AVERAGE) d_{0} = %3.3f #pm %3.3f #AA",d0,d0e));
-	l_eloss->DrawLatex(0.1,0.5,Form("C_{0} = %3.3f #pm %3.3f eV MeV/#AA",deddcoef,deddcoefe));
-	l_eloss->DrawLatex(0.1,0.4,Form("C_{1} = %3.3f #pm %3.3f eV/#AA",deddconst,deddconste));
-	l_eloss->DrawLatex(0.1,0.3,"Ignoring fit parameter errors,");
-	l_eloss->DrawLatex(0.1,0.2,Form("E_{loss} = #left[ #frac{%3.1f}{E_{#alpha}} + %3.1f #right] (d + %3.1f)",deddcoef,deddconst,d0));
-	l_eloss->DrawLatex(0.4,0.1,Form("#pm #sqrt{ #left[ #frac{%3.1f}{E_{#alpha}^{2}} + %3.1f #right](#Deltad)^{2} + #frac{%3.1f}{E_{#alpha}^{4}}(d^{2} + %3.1f)(#DeltaE_{#alpha})^{2} }",deddcoef*deddcoef,deddconst*deddconst,deddcoef*deddcoef,d0*d0));
+
+	l_form->DrawLatex(0.1,0.9,"StDev energy loss model:");
+	l_form->DrawLatex(0.1,0.8,"#sigma#left[E_{loss}(d,E_{#alpha})#right] #approx C_{#sigma} (d + d'_{0})^{2}");
+	l_form->DrawLatex(0.1,0.65,"C_{#sigma} (E_{#alpha}) #approx C_{2} - C_{3} log#left[#frac{E_{#alpha}}{(1 MeV)}#right]");
+
+	// Part 5: depth dependence
+	c1->cd(5);
+
+	TGraphErrors *stdv_eloss5 = new TGraphErrors(4,depth,elose_5MeV,depthe,depthe);
+	stdv_eloss5->SetTitle("E_{#alpha} = 5 MeV");
+	stdv_eloss5->SetLineColor(2);
+	stdv_eloss5->SetMarkerColor(2);
+	stdv_eloss5->Draw();
+	TF1 *fstdveloss5 = new TF1("fstdveloss5","[0]*TMath::Power(x+[1],2)",4.,21.);
+	fstdveloss5->SetParameters(1.,1.);
+	fstdveloss5->SetLineColor(2);
+	fstdveloss5->SetTitle("Linear fit (5 MeV)");
+	stdv_eloss5->Fit("fstdveloss5","B");
+	double sdedd5 = fstdveloss5->GetParameter(0);
+	double sdedd5e = fstdveloss5->GetParError(0);
+	double sd05 = fstdveloss5->GetParameter(1);
+	double sd05e = fstdveloss5->GetParError(1);
+
+	TGraphErrors *stdv_eloss6 = new TGraphErrors(4,depth,elose_6MeV,depthe,depthe);
+	stdv_eloss6->SetTitle("E_{#alpha} = 6 MeV");
+	stdv_eloss6->SetLineColor(3);
+	stdv_eloss6->SetMarkerColor(3);
+	stdv_eloss6->Draw();
+	TF1 *fstdveloss6 = new TF1("fstdveloss6","[0]*TMath::Power(x+[1],2)",4.,21.);
+	fstdveloss6->SetParameters(1.,1.);
+	fstdveloss6->SetLineColor(3);
+	fstdveloss6->SetTitle("Linear fit (6 MeV)");
+	stdv_eloss6->Fit("fstdveloss6","B");
+	double sdedd6 = fstdveloss6->GetParameter(0);
+	double sdedd6e = fstdveloss6->GetParError(0);
+	double sd06 = fstdveloss6->GetParameter(1);
+	double sd06e = fstdveloss6->GetParError(1);
+
+	TGraphErrors *stdv_eloss7 = new TGraphErrors(4,depth,elose_7MeV,depthe,depthe);
+	stdv_eloss7->SetTitle("E_{#alpha} = 7 MeV");
+	stdv_eloss7->SetLineColor(4);
+	stdv_eloss7->SetMarkerColor(4);
+	stdv_eloss7->Draw();
+	TF1 *fstdveloss7 = new TF1("fstdveloss7","[0]*TMath::Power(x+[1],2)",4.,21.);
+	fstdveloss7->SetParameters(1.,1.);
+	fstdveloss7->SetLineColor(4);
+	fstdveloss7->SetTitle("Linear fit (7 MeV)");
+	stdv_eloss7->Fit("fstdveloss7","B");
+	double sdedd7 = fstdveloss7->GetParameter(0);
+	double sdedd7e = fstdveloss7->GetParError(0);
+	double sd07 = fstdveloss7->GetParameter(1);
+	double sd07e = fstdveloss7->GetParError(1);
+
+	TMultiGraph *mg_stdev_eloss = new TMultiGraph();
+	mg_stdev_eloss->SetTitle("Depth dependence of StDev of energy loss of #alpha particles in SUS303;Depth d [#AA];#sigma(E_{loss}) [eV]");
+	mg_stdev_eloss->Add(stdv_eloss5);
+	mg_stdev_eloss->Add(stdv_eloss6);
+	mg_stdev_eloss->Add(stdv_eloss7);
+	mg_stdev_eloss->Draw("AP*");
+	fstdveloss5->Draw("SAME");
+	fstdveloss6->Draw("SAME");
+	fstdveloss7->Draw("SAME");
+	c1->cd(5)->BuildLegend();
+
+	double sdedd = (sdedd5 + sdedd6 + sdedd7) / 3.0;
+	double sdedde = TMath::Sqrt(sdedd5e*sdedd5e + sdedd6e*sdedd6e + sdedd7e*sdedd7e) / 3.0;
+	double sd0 = (sd05 + sd06 + sd07) / 3.0;
+	double sd0e = TMath::Sqrt(sd05e*sd05e + sd06e*sd06e + sd07e*sd07e) / 3.0;
+	l_eloss->DrawLatex(12.,150.,Form("d'_{0} = %3.3f #AA",sd0));
+
+
+	// Part 6: energy dependence
+
+	c1->cd(6);
+
+	double eslossae[3] = {sdedd5,sdedd6,sdedd7};
+	TGraphErrors *eslossedep = new TGraphErrors(3,ealpha,eslossae,ealphae,ealphae);
+	eslossedep->SetTitle("E_{#alpha} dependence of C_{#sigma};#alpha particle energy E_{#alpha} [MeV];C_{#sigma} [eV/#AA^{2}]");
+	eslossedep->Draw("AP*");
+	TF1 *feslossedep = new TF1("feslossedep","[0] - [1]*TMath::Log(x)");
+	feslossedep->SetParameters(1.,1.);
+	eslossedep->Fit("feslossedep");
+	double sdeddcoef = feslossedep->GetParameter(0);
+	double sdeddcoefe = feslossedep->GetParError(0);
+	double sdeddconst = feslossedep->GetParameter(1);
+	double sdeddconste = feslossedep->GetParError(1);
+	l_eloss->DrawLatex(6.0,0.164,Form("C_{2} = %3.3f eV/#AA^{2}",sdeddcoef));
+	l_eloss->DrawLatex(6.0,0.160,Form("C_{3} = %3.3f eV/#AA^{2}",sdeddconst));
 
 
 	rootapp.Run();

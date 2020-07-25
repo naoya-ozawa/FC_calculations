@@ -16,18 +16,21 @@ int main(int argc, char** argv){
   fstream file;
   string word, filename;
 
+  filename = "./RANGE_3D_Fr_in_SUS303_5keV.txt";
 //  filename = "./RANGE_3D_Fr_in_SUS303_1keV.txt";
+//  filename = "./RANGE_3D_Fr_in_SUS303_50eV.txt";
 //  filename = "./RANGE_3D_Fr_in_SUS303_10eV.txt";
-  filename = "./RANGE_3D_Fr_in_SUS303_100eV.txt";
+//  filename = "./RANGE_3D_Fr_in_SUS303_500eV.txt";
+//  filename = "./RANGE_3D_Fr_in_SUS303_100eV.txt";
 //  filename = "./EXYZ_alpha_in_SUS303_5MeV.txt";
 //  filename = "./EXYZ_alpha_in_SUS303_6MeV.txt";
 //  filename = "./EXYZ_alpha_in_SUS303_7MeV.txt";
 
-  int energy = 100;
+  int energy = 5000;
 
   file.open(filename.c_str());
 
-  TH1D *spectrum = new TH1D("spectrum",Form("Stopping Range of %d eV Fr ions Injected into SUS303",energy),2000,0.,20.);
+  TH1D *spectrum = new TH1D("spectrum",Form("Stopping Range of %d eV Fr ions Injected into SUS303",energy),5000,0.,50.);
   spectrum->GetXaxis()->SetTitle("Range (#AA)");
   spectrum->GetYaxis()->SetTitle("Ions / 1 pm");
 
