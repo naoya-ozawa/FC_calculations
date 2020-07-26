@@ -9,3 +9,6 @@ energy_degradation:	energy_degradation.cpp
 
 dEdX_plotter:	dEdX_plotter.cpp
 	`root-config --cxx --cflags` -o dEdX_plotter dEdX_plotter.cpp `root-config --glibs`
+
+espectrum:	espectrum.cpp
+	`root-config --cxx --cflags` -o espectrum espectrum.cpp `root-config --glibs`
