@@ -124,10 +124,46 @@ int main(int argc, char** argv){
 
   c1->cd(2)->BuildLegend();
 
-  rootapp.Run();
 
   c1->Update();
   c1->Modified();
+
+
+  // BG spectrum (3-source)
+  TCanvas *c2 = new TCanvas();
+
+  range_ll = 4.0; // MeV
+
+  double E_241Am[3] = {5.48556,5.44280,5.388}; // MeV
+  double br_241Am[3] = {0.848,0.131,0.0166};
+  double E_237Np[8] = {4.7880,4.7714,4.7665,4.6400,4.6650,4.8168,4.8727,4.8035}; // MeV
+  double br_237Np[8] = {0.4764,0.2320,0.0930,0.0643,0.03478,0.02430,0.0239,0.02014};
+  double E_244Cm[2] = {5.80477,5.76264}; // MeV
+  double br_244Cm[2] = {0.7690,0.2310};
+
+  TH1D *hist_src = new TH1D("hist_src","Alpha from alpha-source",int((range_ul-range_ll)*1000),range_ll,range_ul);
+  // 241-Am
+  for (int i=0; i<3; ++i){
+    for (int j=0; j<int(Npar*br_241Am[i]); ++j){
+      hist_src->Fill(rnd->Gaus(E_241Am[i],SSD_stdv));
+    }
+  }
+  // 237-Np
+  for (int i=0; i<8; ++i){
+    for (int j=0; j<int(Npar*br_237Np[i]); ++j){
+      hist_src->Fill(rnd->Gaus(E_237Np[i],SSD_stdv));
+    }
+  }
+  // 244-Cm
+  for (int i=0; i<2; ++i){
+    for (int j=0; j<int(Npar*br_244Cm[i]); ++j){
+      hist_src->Fill(rnd->Gaus(E_244Cm[i],SSD_stdv));
+    }
+  }
+  hist_src->SetTitle(Form("#alpha source energy spectrum (simulation);Energy (MeV);Counts (/%3.3f MeV)",hist_src->GetXaxis()->GetBinWidth(0)));
+  hist_src->Draw();
+
+  rootapp.Run();
 
   return 0;
 
