@@ -131,8 +131,11 @@ int main(int argc, char** argv){
 
   // BG spectrum (3-source)
   TCanvas *c2 = new TCanvas();
+  c2->Divide(1,2);
 
+  c2->cd(1);
   range_ll = 4.0; // MeV
+  range_ul = 7.1; // MeV
 
   double E_241Am[3] = {5.48556,5.44280,5.388}; // MeV
   double br_241Am[3] = {0.848,0.131,0.0166};
@@ -163,8 +166,39 @@ int main(int argc, char** argv){
   hist_src->SetTitle(Form("#alpha source energy spectrum (simulation);Energy (MeV);Counts (/%3.3f MeV)",hist_src->GetXaxis()->GetBinWidth(0)));
   hist_src->Draw();
 
-  rootapp.Run();
+  c2->cd(2);
+  double E_208Fr = 6.641; // MeV
+  double br_208Fr = 0.89;
+  double E_209Fr = 6.646; // MeV
+  double br_209Fr = 0.89;
+  double E_210Fr = 6.545; // MeV
+  double br_210Fr = 0.71;
+  double E_211Fr = 6.537; // MeV
+  double br_211Fr = 0.87;
+  double E_Fr[4] = {E_208Fr,E_209Fr,E_210Fr,E_211Fr};
+  double br_Fr[4] = {br_208Fr,br_209Fr,br_210Fr,br_211Fr};
 
+  TH1D *hist_fr = new TH1D("hist_fr","Alpha from Fr",int((range_ul-range_ll)*1000),range_ll,range_ul);
+  hist_fr->SetLineColor(2);
+
+  for (int i=0; i<4; ++i){
+    for (int j=0; j<int(Npar*br_Fr[i]); ++j){
+      hist_fr->Fill(rnd->Gaus(E_Fr[i],SSD_stdv));
+    }
+  }
+
+  THStack *net_spectrum = new THStack();
+  net_spectrum->SetTitle(Form("Simulated Energy Spectrum;Energy (MeV);Counts (/%3.3f MeV)",hist_src->GetXaxis()->GetBinWidth(0)));
+  net_spectrum->Add(hist_src);
+  net_spectrum->Add(hist_fr);
+  net_spectrum->Draw("nostack");
+
+  c2->cd(2)->BuildLegend();
+
+  c2->Update();
+  c2->Modified();
+
+  rootapp.Run();
   return 0;
 
 }
